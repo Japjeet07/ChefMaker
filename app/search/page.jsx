@@ -5,8 +5,9 @@ import ProtectedRoute from "../../components/ProtectedRoute";
 
 async function searchRecipes(query) {
   try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://chefmaker.onrender.com' : 'http://localhost:3000');
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/recipes?search=${encodeURIComponent(query)}`,
+      `${baseUrl}/api/recipes?search=${encodeURIComponent(query)}`,
       { cache: 'no-store' }
     );
     

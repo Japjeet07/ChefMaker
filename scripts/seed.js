@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 
 // Recipe Schema
@@ -209,7 +210,7 @@ const sampleRecipes = [
 async function seedDatabase() {
   try {
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/recipe-finder');
+    await mongoose.connect(process.env.MONGODB_URI);
     console.log('Connected to MongoDB');
 
     // Clear existing recipes

@@ -8,7 +8,7 @@ import ProtectedRoute from "../../../components/ProtectedRoute";
 async function getRecipes(cuisine) {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/recipes?cuisine=${encodeURIComponent(cuisine)}`,
+      `${process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://chefmaker.onrender.com' : 'http://localhost:3000')}/api/recipes?cuisine=${encodeURIComponent(cuisine)}`,
       { cache: 'no-store' }
     );
     

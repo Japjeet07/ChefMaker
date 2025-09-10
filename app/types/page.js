@@ -3,7 +3,8 @@ import React from "react";
 
 const fetchCuisines = async () => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/cuisines`, {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://chefmaker.onrender.com' : 'http://localhost:3000');
+    const res = await fetch(`${baseUrl}/api/cuisines`, {
       cache: 'no-store' // Ensure fresh data
     });
     
