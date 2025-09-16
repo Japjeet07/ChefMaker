@@ -45,3 +45,4 @@ const ProtectedRoute = ({ children, fallback = null }) => {
 };
 
 export default ProtectedRoute;
+

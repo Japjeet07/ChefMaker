@@ -82,3 +82,4 @@ RecipeSchema.index({ cuisine: 1 });
 RecipeSchema.index({ tags: 1 });
 
 export default mongoose.models.Recipe || mongoose.model('Recipe', RecipeSchema);
+
