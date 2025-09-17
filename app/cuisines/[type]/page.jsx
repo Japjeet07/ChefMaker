@@ -2,8 +2,8 @@ import React from "react";
 import Link from "next/link";
 
 //components
-import RecipeList from "../../../components/RecipeList";
-import ProtectedRoute from "../../../components/ProtectedRoute";
+import RecipeList from "../../../components/features/RecipeList";
+import ProtectedRoute from "../../../components/layout/ProtectedRoute";
 
 async function getRecipes(cuisine) {
   try {

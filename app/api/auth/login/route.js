@@ -1,44 +1,38 @@
-import connectDB from '../../../lib/mongodb';
-import User from '../../../models/User';
+import connectDB from '../../../../utils/mongodb';
+import User from '../../../../models/User';
 import jwt from 'jsonwebtoken';
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({
-      success: false,
-      message: 'Method not allowed'
-    });
-  }
-
-  await connectDB();
-
+// POST /api/auth/login
+export async function POST(request) {
   try {
-    const { email, password } = req.body;
+    await connectDB();
+    
+    const { email, password } = await request.json();
 
     // Validation
     if (!email || !password) {
-      return res.status(400).json({
+      return Response.json({
         success: false,
         message: 'Please provide email and password'
-      });
+      }, { status: 400 });
     }
 
     // Find user
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      return res.status(401).json({
+      return Response.json({
         success: false,
         message: 'Invalid credentials'
-      });
+      }, { status: 401 });
     }
 
     // Check password
-    const isPasswordValid = await user.comparePassword(password);
+    const isPasswordValid = await user.matchPassword(password);
     if (!isPasswordValid) {
-      return res.status(401).json({
+      return Response.json({
         success: false,
         message: 'Invalid credentials'
-      });
+      }, { status: 401 });
     }
 
     // Generate JWT token
@@ -48,15 +42,14 @@ export default async function handler(req, res) {
       { expiresIn: '7d' }
     );
 
-    res.status(200).json({
+    return Response.json({
       success: true,
       message: 'Login successful',
       data: {
         user: {
           id: user._id,
           name: user.name,
-          email: user.email,
-          role: user.role
+          email: user.email
         },
         token
       }
@@ -64,11 +57,10 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({
+    return Response.json({
       success: false,
       message: 'Error during login',
       error: error.message
-    });
+    }, { status: 500 });
   }
 }
-

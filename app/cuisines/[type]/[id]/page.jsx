@@ -1,4 +1,4 @@
-import SafeImage from "../../../../components/SafeImage";
+import SafeImage from "../../../../components/ui/SafeImage";
 
 async function getRecipeDetails(id) {
   // await new Promise((r) => setTimeout(r, 5000));

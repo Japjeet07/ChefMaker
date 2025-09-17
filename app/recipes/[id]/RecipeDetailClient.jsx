@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import SafeImage from "../../../components/SafeImage";
+import SafeImage from "../../../components/ui/SafeImage";
 import { useRouter } from "next/navigation";
-import AddToCart from "../../../components/AddToCart";
-import ProtectedRoute from "../../../components/ProtectedRoute";
+import AddToCart from "../../../components/features/AddToCart";
+import ProtectedRoute from "../../../components/layout/ProtectedRoute";
 
 export default function RecipeDetailClient({ recipe }) {
   const router = useRouter();

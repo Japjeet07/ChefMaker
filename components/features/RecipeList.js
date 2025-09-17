@@ -1,5 +1,5 @@
 import React from "react";
-import SafeImage from "./SafeImage";
+import SafeImage from "../ui/SafeImage";
 import Link from "next/link";
 
 //Components

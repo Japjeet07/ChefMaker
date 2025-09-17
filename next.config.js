@@ -5,9 +5,7 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 });
 
 const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
+  outputFileTracingRoot: __dirname,
   images: {
     remotePatterns: [
       {
@@ -76,4 +74,4 @@ const nextConfig = {
 
 //localhost:3000/(https:/www.themealdb.com/images/media/meals/uuqvwu1504629254.jpg)
 
-http: module.exports = withBundleAnalyzer(nextConfig);
+module.exports = withBundleAnalyzer(nextConfig);

@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import SafeImage from "../../components/SafeImage";
-import ProtectedRoute from "../../components/ProtectedRoute";
+import SafeImage from "../../components/ui/SafeImage";
+import ProtectedRoute from "../../components/layout/ProtectedRoute";
 import { useAuth } from "../../contexts/AuthContext";
 
 const CartPage = () => {

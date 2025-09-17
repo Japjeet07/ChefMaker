@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import ProtectedRoute from '../../../components/ProtectedRoute';
-import SafeImage from '../../../components/SafeImage';
+import ProtectedRoute from '../../../components/layout/ProtectedRoute';
+import SafeImage from '../../../components/ui/SafeImage';
 
 export default function AddRecipe() {
   const router = useRouter();

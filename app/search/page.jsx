@@ -1,8 +1,8 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from "react";
-import RecipeList from "../../components/RecipeList";
-import SearchBar from "../../components/SearchBar";
-import ProtectedRoute from "../../components/ProtectedRoute";
+import RecipeList from "../../components/features/RecipeList";
+import SearchBar from "../../components/features/SearchBar";
+import ProtectedRoute from "../../components/layout/ProtectedRoute";
 
 async function searchRecipes(query) {
   try {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { extractImageUrlFromGoogle, isValidImageUrl, getFallbackImageUrl } from '../lib/imageUtils';
+import { extractImageUrlFromGoogle, isValidImageUrl, getFallbackImageUrl } from '../../utils/imageUtils';
 
 export default function SafeImage({ src, alt, width, height, className, ...props }) {
   const [imageSrc, setImageSrc] = useState(() => {

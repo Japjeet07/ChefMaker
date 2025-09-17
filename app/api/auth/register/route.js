@@ -1,42 +1,36 @@
-import connectDB from '../../../lib/mongodb';
-import User from '../../../models/User';
+import connectDB from '../../../../utils/mongodb';
+import User from '../../../../models/User';
 import jwt from 'jsonwebtoken';
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({
-      success: false,
-      message: 'Method not allowed'
-    });
-  }
-
-  await connectDB();
-
+// POST /api/auth/register
+export async function POST(request) {
   try {
-    const { name, email, password } = req.body;
+    await connectDB();
+    
+    const { name, email, password } = await request.json();
 
     // Validation
     if (!name || !email || !password) {
-      return res.status(400).json({
+      return Response.json({
         success: false,
         message: 'Please provide all required fields'
-      });
+      }, { status: 400 });
     }
 
     if (password.length < 6) {
-      return res.status(400).json({
+      return Response.json({
         success: false,
         message: 'Password must be at least 6 characters'
-      });
+      }, { status: 400 });
     }
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({
+      return Response.json({
         success: false,
         message: 'User already exists with this email'
-      });
+      }, { status: 400 });
     }
 
     // Create user
@@ -53,27 +47,25 @@ export default async function handler(req, res) {
       { expiresIn: '7d' }
     );
 
-    res.status(201).json({
+    return Response.json({
       success: true,
       message: 'User created successfully',
       data: {
         user: {
           id: user._id,
           name: user.name,
-          email: user.email,
-          role: user.role
+          email: user.email
         },
         token
       }
-    });
+    }, { status: 201 });
 
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({
+    return Response.json({
       success: false,
       message: 'Error creating user',
       error: error.message
-    });
+    }, { status: 500 });
   }
 }
-

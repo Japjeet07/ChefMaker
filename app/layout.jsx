@@ -1,8 +1,8 @@
 import "../styles/globals.css";
 
 //components
-import Header from "../components/Header";
-import TrackingComponents from "../components/TrackingComponents";
+import Header from "../components/layout/Header";
+import TrackingComponents from "../components/layout/TrackingComponents";
 import { AuthProvider } from "../contexts/AuthContext";
 
 export default function RootLayout({ children }) {

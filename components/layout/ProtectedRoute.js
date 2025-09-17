@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 const ProtectedRoute = ({ children, fallback = null }) => {
   const { user, loading, setShowAuthModal } = useAuth();
