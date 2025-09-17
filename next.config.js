@@ -6,6 +6,15 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 
 const nextConfig = {
   outputFileTracingRoot: __dirname,
+  // Performance optimizations
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'react-icons'],
+  },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  // Enable static optimization where possible
+  trailingSlash: false,
   images: {
     remotePatterns: [
       {

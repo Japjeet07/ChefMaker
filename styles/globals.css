@@ -47,9 +47,34 @@
   100% { background-position: 0% 50%; }
 }
 
+@keyframes text-glow {
+  0%, 100% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+  50% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.6); }
+}
+
+@keyframes cooking-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-15px) rotate(-2deg); }
+  50% { transform: translateY(-10px) rotate(0deg); }
+  75% { transform: translateY(-20px) rotate(2deg); }
+}
+
 /* Custom utility classes */
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+.animate-text-glow {
+  animation: text-glow 2s ease-in-out infinite;
+}
+
+.animate-cooking-float {
+  animation: cooking-float 4s ease-in-out infinite;
+}
+
+.animate-gradient-shift {
+  background-size: 400% 400%;
+  animation: gradient-shift 3s ease infinite;
 }
 
 .animate-pulse-glow {
