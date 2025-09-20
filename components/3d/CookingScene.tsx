@@ -265,25 +265,47 @@ function setupAnimation(model: THREE.Group) {
   const scene = new Scene(model);
   const plane = scene.modelGroup;
   
+  // Enhanced mobile detection and viewport setup
+  const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
+
   // Configure ScrollTrigger for mobile compatibility
   ScrollTrigger.config({
-    ignoreMobileResize: true,
+    ignoreMobileResize: false, // Enable mobile resize handling
     syncInterval: 16, // 60fps
-    autoRefreshEvents: "visibilitychange,DOMContentLoaded,load"
+    autoRefreshEvents: "visibilitychange,DOMContentLoaded,load,resize,orientationchange"
   });
 
-  // Force refresh on mobile devices
-  if (window.innerWidth <= 768) {
-    setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 100);
+  // Force refresh on mobile devices with multiple attempts
+  if (isMobile) {
+    setTimeout(() => ScrollTrigger.refresh(), 100);
+    setTimeout(() => ScrollTrigger.refresh(), 300);
+    setTimeout(() => ScrollTrigger.refresh(), 600);
+    setTimeout(() => ScrollTrigger.refresh(), 1000);
+  }
+  
+  // Set proper viewport height for mobile browsers
+  if (isMobile) {
+    const setVH = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+    setVH();
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', setVH);
   }
 
   // Debug mobile scroll
   console.log('Setting up animation for device:', {
-    isMobile: window.innerWidth <= 768,
+    isMobile,
+    isIOS,
+    isAndroid,
     userAgent: navigator.userAgent,
-    touchSupport: 'ontouchstart' in window
+    touchSupport: 'ontouchstart' in window,
+    viewportHeight: window.innerHeight,
+    documentHeight: document.documentElement.scrollHeight,
+    scrollTop: window.pageYOffset || document.documentElement.scrollTop
   });
   
   gsap.fromTo('canvas', { x: "50%", autoAlpha: 0 }, { duration: 1, x: "0%", autoAlpha: 1 });
@@ -396,22 +418,30 @@ function setupAnimation(model: THREE.Group) {
   const tl = gsap.timeline({
     onUpdate: scene.render,
     scrollTrigger: {
-      trigger: ".content",
-      scrub: 0.5, // Even faster scrub for mobile
+      trigger: "body", // Use body as trigger for better mobile compatibility
+      scrub: isMobile ? 0.05 : 0.5, // Much faster scrub for mobile
       start: "top top",
       end: "bottom bottom",
       anticipatePin: 1,
-      refreshPriority: -1,
       invalidateOnRefresh: true,
+      fastScrollEnd: true, // Enable fast scroll end detection
       onUpdate: (self) => {
         // Force render on mobile
-        if (window.innerWidth <= 768) {
+        if (isMobile) {
           scene.render();
         }
-        console.log('ScrollTrigger update:', self.progress);
+        console.log('ScrollTrigger update:', self.progress, 'isActive:', self.isActive, 'direction:', self.direction);
       },
       onRefresh: () => {
         console.log('ScrollTrigger refreshed');
+        // Force render after refresh
+        scene.render();
+      },
+      onToggle: (self) => {
+        console.log('ScrollTrigger toggled:', self.isActive);
+        if (self.isActive) {
+          scene.render();
+        }
       }
     },
     defaults: { duration: sectionDuration, ease: 'power2.inOut' }
@@ -503,30 +533,53 @@ export default function CookingScene() {
 
     // Add mobile-specific event listeners
     const handleOrientationChange = () => {
+      console.log('Orientation change detected');
       setTimeout(() => {
         ScrollTrigger.refresh();
+        ScrollTrigger.update();
+      }, 100);
+      setTimeout(() => {
+        ScrollTrigger.refresh();
+        ScrollTrigger.update();
       }, 500);
     };
 
     const handleResize = () => {
-      if (window.innerWidth <= 768) {
+      console.log('Resize detected');
+      const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
+      if (isMobile) {
         setTimeout(() => {
           ScrollTrigger.refresh();
+          ScrollTrigger.update();
         }, 100);
+        setTimeout(() => {
+          ScrollTrigger.refresh();
+          ScrollTrigger.update();
+        }, 300);
       }
     };
 
     // Add touch event handling for mobile
-    const handleTouchStart = () => {
-      console.log('Touch start detected');
+    const handleTouchStart = (e: TouchEvent) => {
+      console.log('Touch start detected', e.touches.length);
     };
 
-    const handleTouchMove = () => {
-      console.log('Touch move detected');
+    const handleTouchMove = (e: TouchEvent) => {
+      console.log('Touch move detected', e.touches.length);
+      // Force ScrollTrigger update on touch move
+      ScrollTrigger.update();
     };
 
     const handleScroll = () => {
       console.log('Scroll detected');
+      // Force ScrollTrigger update on scroll
+      ScrollTrigger.update();
+    };
+
+    // Add wheel event for desktop
+    const handleWheel = () => {
+      console.log('Wheel detected');
+      ScrollTrigger.update();
     };
 
     window.addEventListener('orientationchange', handleOrientationChange);
@@ -534,12 +587,27 @@ export default function CookingScene() {
     window.addEventListener('touchstart', handleTouchStart, { passive: true });
     window.addEventListener('touchmove', handleTouchMove, { passive: true });
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('wheel', handleWheel, { passive: true });
 
-    // Force multiple refreshes for mobile
-    if (window.innerWidth <= 768) {
-      setTimeout(() => ScrollTrigger.refresh(), 100);
-      setTimeout(() => ScrollTrigger.refresh(), 500);
-      setTimeout(() => ScrollTrigger.refresh(), 1000);
+    // Force multiple refreshes for mobile with updates
+    const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
+    if (isMobile) {
+      setTimeout(() => {
+        ScrollTrigger.refresh();
+        ScrollTrigger.update();
+      }, 100);
+      setTimeout(() => {
+        ScrollTrigger.refresh();
+        ScrollTrigger.update();
+      }, 500);
+      setTimeout(() => {
+        ScrollTrigger.refresh();
+        ScrollTrigger.update();
+      }, 1000);
+      setTimeout(() => {
+        ScrollTrigger.refresh();
+        ScrollTrigger.update();
+      }, 2000);
     }
 
     return () => {
@@ -549,13 +617,15 @@ export default function CookingScene() {
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('wheel', handleWheel);
       
       const canvas = document.querySelector('canvas');
       if (canvas && canvas.parentNode) {
         canvas.parentNode.removeChild(canvas);
       }
       
-      // Refresh ScrollTrigger on cleanup
+      // Clean up ScrollTrigger instances
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
       ScrollTrigger.refresh();
     };
   }, []);
