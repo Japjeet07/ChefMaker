@@ -265,6 +265,20 @@ function setupAnimation(model: THREE.Group) {
   const scene = new Scene(model);
   const plane = scene.modelGroup;
   
+  // Configure ScrollTrigger for mobile compatibility
+  ScrollTrigger.config({
+    ignoreMobileResize: true,
+    syncInterval: 16, // 60fps
+    autoRefreshEvents: "visibilitychange,DOMContentLoaded,load"
+  });
+
+  // Force refresh on mobile devices
+  if (window.innerWidth <= 768) {
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+  }
+  
   gsap.fromTo('canvas', { x: "50%", autoAlpha: 0 }, { duration: 1, x: "0%", autoAlpha: 1 });
   gsap.to('.loading', { autoAlpha: 0 });
   gsap.to('.scroll-cta', { opacity: 1 });
@@ -376,9 +390,17 @@ function setupAnimation(model: THREE.Group) {
     onUpdate: scene.render,
     scrollTrigger: {
       trigger: ".content",
-      scrub: 3, // Much slower scrub value - higher number = slower movement
+      scrub: 1, // Faster scrub for mobile responsiveness
       start: "top top",
-      end: "bottom bottom"
+      end: "bottom bottom",
+      anticipatePin: 1,
+      refreshPriority: -1,
+      onUpdate: (self) => {
+        // Force render on mobile
+        if (window.innerWidth <= 768) {
+          scene.render();
+        }
+      }
     },
     defaults: { duration: sectionDuration, ease: 'power2.inOut' }
   });
@@ -467,12 +489,36 @@ export default function CookingScene() {
 
     loadModel();
 
+    // Add mobile-specific event listeners
+    const handleOrientationChange = () => {
+      setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 500);
+    };
+
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        setTimeout(() => {
+          ScrollTrigger.refresh();
+        }, 100);
+      }
+    };
+
+    window.addEventListener('orientationchange', handleOrientationChange);
+    window.addEventListener('resize', handleResize);
+
     return () => {
       // Cleanup
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      window.removeEventListener('resize', handleResize);
+      
       const canvas = document.querySelector('canvas');
       if (canvas && canvas.parentNode) {
         canvas.parentNode.removeChild(canvas);
       }
+      
+      // Refresh ScrollTrigger on cleanup
+      ScrollTrigger.refresh();
     };
   }, []);
 
