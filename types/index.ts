@@ -288,6 +288,22 @@ export interface UserStats {
   blogsCount: number;
 }
 
+// Assistant Chef types
+export interface ChefPersonality {
+  id: string;
+  name: string;
+  description: string;
+  avatar: string;
+  personality: 'abrasive' | 'spiritual' | 'educational' | 'enthusiastic';
+  specialty: string;
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  image?: string;
+}
+
 // Utility types
 export type Status = 'idle' | 'loading' | 'success' | 'error';
 

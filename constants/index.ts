@@ -1,18 +1,8 @@
 // Environment Configuration
 export const ENV_CONFIG = {
-  NODE_ENV: process.env.NODE_ENV || 'development',
-  JWT_SECRET: process.env.JWT_SECRET || (() => {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('JWT_SECRET must be set in production');
-    }
-    return 'dev-secret-key';
-  })(),
-  MONGODB_URI: process.env.MONGODB_URI || (() => {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('MONGODB_URI must be set in production');
-    }
-    return 'mongodb://localhost:27017/chefmaker';
-  })(),
+  NODE_ENV: process.env.NODE_ENV ,
+  JWT_SECRET: process.env.JWT_SECRET ,
+  MONGODB_URI: process.env.MONGODB_URI
 } as const;
 
 // API Configuration

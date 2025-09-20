@@ -12,7 +12,7 @@ export const verifyToken = (request: NextRequest): any => {
   }
   
   try {
-    return jwt.verify(token, ENV_CONFIG.JWT_SECRET);
+    return jwt.verify(token, ENV_CONFIG.JWT_SECRET as string);
   } catch (error) {
     throw new Error('Invalid token');
   }
@@ -22,7 +22,7 @@ export const verifyToken = (request: NextRequest): any => {
 export const generateToken = (userId: string): string => {
   return jwt.sign(
     { userId },
-    ENV_CONFIG.JWT_SECRET,
+    ENV_CONFIG.JWT_SECRET as string,
     { expiresIn: '7d' }
   );
 };
