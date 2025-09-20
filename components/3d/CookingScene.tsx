@@ -27,15 +27,18 @@ class Scene {
       { bottom: 0, height: 1 }
     ];
     
+    // Optimize renderer for mobile performance
+    const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
     this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true
+      antialias: !isMobile, // Disable antialiasing on mobile for better performance
+      alpha: true,
+      powerPreference: "high-performance"
     });
     
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.enabled = !isMobile; // Disable shadows on mobile for better performance
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setPixelRatio(isMobile ? Math.min(window.devicePixelRatio, 2) : window.devicePixelRatio); // Limit pixel ratio on mobile
 
     document.body.appendChild(this.renderer.domElement);
     
@@ -273,7 +276,7 @@ function setupAnimation(model: THREE.Group) {
   // Configure ScrollTrigger for mobile compatibility
   ScrollTrigger.config({
     ignoreMobileResize: false, // Enable mobile resize handling
-    syncInterval: 16, // 60fps
+    syncInterval: isMobile ? 8 : 16, // Higher fps on mobile for smoother animation
     autoRefreshEvents: "visibilitychange,DOMContentLoaded,load,resize,orientationchange"
   });
 
@@ -429,21 +432,26 @@ function setupAnimation(model: THREE.Group) {
     onUpdate: scene.render,
     scrollTrigger: {
       trigger: ".content",
-      scrub: isMobile ? 0.1 : 0.5, // Much faster response on mobile
+      scrub: isMobile ? 0.05 : 0.5, // Even faster response on mobile
       start: "top top",
       end: "bottom bottom",
       anticipatePin: 1,
       invalidateOnRefresh: true,
       fastScrollEnd: true,
       onUpdate: (self) => {
-        console.log('ScrollTrigger update:', self.progress, 'isActive:', self.isActive, 'direction:', self.direction);
+        // Only log on desktop to reduce mobile overhead
+        if (!isMobile) {
+          console.log('ScrollTrigger update:', self.progress, 'isActive:', self.isActive, 'direction:', self.direction);
+        }
         // Force render on mobile for smoother animation
         if (isMobile) {
           scene.render();
         }
       },
       onRefresh: () => {
-        console.log('ScrollTrigger refreshed');
+        if (!isMobile) {
+          console.log('ScrollTrigger refreshed');
+        }
         scene.render();
       }
     },
@@ -549,15 +557,23 @@ export default function CookingScene() {
       }, 100);
     };
 
-    // Add touch scroll handling for mobile
+    // Add optimized touch scroll handling for mobile
+    let touchUpdateTimeout: NodeJS.Timeout;
     const handleTouchMove = () => {
-      // Force ScrollTrigger update on touch move
-      ScrollTrigger.update();
+      // Throttle updates for better performance
+      if (touchUpdateTimeout) clearTimeout(touchUpdateTimeout);
+      touchUpdateTimeout = setTimeout(() => {
+        ScrollTrigger.update();
+      }, 8); // 120fps throttling
     };
 
+    let scrollUpdateTimeout: NodeJS.Timeout;
     const handleScroll = () => {
-      // Force ScrollTrigger update on scroll
-      ScrollTrigger.update();
+      // Throttle updates for better performance
+      if (scrollUpdateTimeout) clearTimeout(scrollUpdateTimeout);
+      scrollUpdateTimeout = setTimeout(() => {
+        ScrollTrigger.update();
+      }, 8); // 120fps throttling
     };
 
     window.addEventListener('orientationchange', handleOrientationChange);
@@ -571,6 +587,10 @@ export default function CookingScene() {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('scroll', handleScroll);
+      
+      // Clear timeouts
+      if (touchUpdateTimeout) clearTimeout(touchUpdateTimeout);
+      if (scrollUpdateTimeout) clearTimeout(scrollUpdateTimeout);
       
       const canvas = document.querySelector('canvas');
       if (canvas && canvas.parentNode) {

@@ -27,7 +27,7 @@ export const API_CONFIG = {
 
 // App Configuration
 export const APP_CONFIG = {
-  NAME: 'Recipe Finder',
+  NAME: 'LetHimCook',
   DESCRIPTION: 'A modern recipe management application',
   VERSION: '1.0.0',
   AUTHOR: 'Your Name',

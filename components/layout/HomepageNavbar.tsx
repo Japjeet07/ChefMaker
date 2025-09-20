@@ -26,15 +26,15 @@ const HomepageNavbar: React.FC = () => {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <div className="text-2xl">👨‍🍳</div>
-            <span className="text-white font-bold text-xl">ChefMaker</span>
+            <span className="text-black font-bold text-xl">LetHimCook</span>
           </Link>
 
           {/* User Status & Action */}
           <div className="flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-3">
-                <div className="text-white">
-                  Welcome, <span className="font-semibold text-yellow-400">{user.name}</span>!
+                <div className="text-black">
+                  Welcome, <span className="font-semibold text-yellow-600">{user.name}</span>!
                 </div>
                 <button
                   onClick={handleLoginClick}

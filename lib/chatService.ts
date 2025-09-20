@@ -435,22 +435,46 @@ export const subscribeToUserChats = (
   }
   
   const chatsRef = collection(db, 'chats');
-  // First try with orderBy, if it fails, fall back to just the where clause
-  const q = query(
-    chatsRef,
-    where('participants', 'array-contains', userId),
-    orderBy('lastMessageAt', 'desc')
-  );
   
-  return onSnapshot(q, (querySnapshot) => {
-    const chats = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as Chat[];
-    callback(chats);
-  }, (error) => {
-    console.warn('Firestore index error, falling back to simple query:', error);
-    // Fallback to a simpler query without orderBy
+  // Try the complex query first, but handle the index error gracefully
+  try {
+    const q = query(
+      chatsRef,
+      where('participants', 'array-contains', userId),
+      orderBy('lastMessageAt', 'desc')
+    );
+    
+    return onSnapshot(q, (querySnapshot) => {
+      const chats = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Chat[];
+      callback(chats);
+    }, (error) => {
+      console.warn('Firestore index error, falling back to simple query:', error);
+      // If the complex query fails, use a simple query and sort manually
+      const fallbackQuery = query(
+        chatsRef,
+        where('participants', 'array-contains', userId)
+      );
+      
+      onSnapshot(fallbackQuery, (querySnapshot) => {
+        const chats = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Chat[];
+        // Sort manually since we can't use orderBy
+        chats.sort((a, b) => {
+          const aTime = a.lastMessageAt?.toDate?.() || new Date(0);
+          const bTime = b.lastMessageAt?.toDate?.() || new Date(0);
+          return bTime.getTime() - aTime.getTime();
+        });
+        callback(chats);
+      });
+    });
+  } catch (error) {
+    console.warn('Error creating complex query, using simple query:', error);
+    // Fallback to simple query if there's any error
     const fallbackQuery = query(
       chatsRef,
       where('participants', 'array-contains', userId)
@@ -469,5 +493,5 @@ export const subscribeToUserChats = (
       });
       callback(chats);
     });
-  });
+  }
 };

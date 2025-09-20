@@ -1,25 +1,10 @@
 import connectDB from '../../../../../utils/mongodb';
 import Blog from '../../../../../models/Blog';
 import User from '../../../../../models/User';
-import jwt from 'jsonwebtoken';
 import { NextRequest } from 'next/server';
 import { ApiResponse } from '../../../../../types';
+import { verifyToken } from '../../../../../utils/auth';
 
-// Helper function to verify JWT token
-const verifyToken = (request: NextRequest): any => {
-  const authHeader = request.headers.get('authorization');
-  const token = authHeader?.replace('Bearer ', '');
-  
-  if (!token) {
-    throw new Error('No token provided');
-  }
-  
-  try {
-    return jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
-  } catch (error) {
-    throw new Error('Invalid token');
-  }
-};
 
 // GET /api/blogs/[id]/comments - Get all comments for a blog
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }): Promise<Response> {

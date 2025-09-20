@@ -1,25 +1,11 @@
 import connectDB from '../../../utils/mongodb';
 import User from '../../../models/User';
 import Recipe from '../../../models/Recipe';
-import jwt from 'jsonwebtoken';
 import { NextRequest } from 'next/server';
 import { ApiResponse, AddToCartRequest, RemoveFromCartRequest } from '../../../types';
+import { verifyToken } from '../../../utils/auth';
 
-// Helper function to verify JWT token
-const verifyToken = (request: NextRequest): any => {
-  const authHeader = request.headers.get('authorization');
-  const token = authHeader?.replace('Bearer ', '');
   
-  if (!token) {
-    throw new Error('No token provided');
-  }
-  
-  try {
-    return jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
-  } catch (error) {
-    throw new Error('Invalid token');
-  }
-};
 
 // GET /api/cart
 export async function GET(request: NextRequest): Promise<Response> {

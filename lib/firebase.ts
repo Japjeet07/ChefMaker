@@ -22,13 +22,7 @@ const getFirebaseConfig = () => {
   const messagingSenderId = process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID;
   const appId = process.env.NEXT_PUBLIC_FIREBASE_APP_ID;
 
-  console.log('Direct environment variable check:');
-  console.log('API Key:', apiKey ? 'Set' : 'Missing', apiKey?.substring(0, 10) + '...');
-  console.log('Auth Domain:', authDomain ? 'Set' : 'Missing', authDomain);
-  console.log('Project ID:', projectId ? 'Set' : 'Missing', projectId);
-  console.log('Storage Bucket:', storageBucket ? 'Set' : 'Missing', storageBucket);
-  console.log('Messaging Sender ID:', messagingSenderId ? 'Set' : 'Missing', messagingSenderId);
-  console.log('App ID:', appId ? 'Set' : 'Missing', appId);
+  // Environment variables checked silently
 
   const missingVars = [];
   if (!apiKey) missingVars.push('NEXT_PUBLIC_FIREBASE_API_KEY');
@@ -57,21 +51,12 @@ let auth: any = null;
 let isInitialized = false;
 
 const initializeFirebase = () => {
-  console.log('=== Firebase Initialization Debug ===');
-  console.log('Already initialized:', isInitialized);
-  console.log('Environment:', {
-    isClient: typeof window !== 'undefined',
-    hasAPIKey: !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY
-  });
-  
   if (isInitialized) {
-    console.log('Firebase already initialized, returning existing instance');
     return { app, db, auth, isInitialized };
   }
   
   // Get config at runtime
   const { missingVars, firebaseConfig } = getFirebaseConfig();
-  console.log('Missing vars:', missingVars);
   
   if (missingVars.length > 0) {
     console.warn('Firebase environment variables missing:', missingVars);
@@ -82,27 +67,21 @@ const initializeFirebase = () => {
   try {
     // Check if Firebase is already initialized
     const existingApps = getApps();
-    console.log('Existing Firebase apps:', existingApps.length);
     
     if (existingApps.length > 0) {
       app = getApp();
-      console.log('Using existing Firebase app');
     } else {
       app = initializeApp(firebaseConfig);
-      console.log('Created new Firebase app');
     }
     
     db = getFirestore(app);
     auth = getAuth(app);
     isInitialized = true;
     
-    console.log('Firebase initialized successfully');
-    console.log('=== End Firebase Initialization Debug ===');
     return { app, db, auth, isInitialized };
   } catch (error) {
     console.error('Firebase initialization failed:', error);
     isInitialized = false;
-    console.log('=== End Firebase Initialization Debug ===');
     return { app: null, db: null, auth: null, isInitialized: false };
   }
 };

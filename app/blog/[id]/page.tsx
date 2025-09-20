@@ -2,11 +2,11 @@ import React from "react";
 import Link from "next/link";
 import ProtectedRoute from "../../../components/layout/ProtectedRoute";
 import BlogDetail from "../../../components/features/BlogDetail";
+import { API_CONFIG } from "../../../constants";
 
 const fetchBlog = async (id: string): Promise<any | null> => {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://chefmaker.onrender.com' : 'http://localhost:3000');
-    const res = await fetch(`${baseUrl}/api/blogs/${id}`, {
+    const res = await fetch(`${API_CONFIG.BASE_URL}/api/blogs/${id}`, {
       cache: 'no-store'
     });
     

@@ -251,16 +251,7 @@ const VerticalNavbar: React.FC = () => {
           {(!isCollapsed || isMobile) && <span className="ml-3 font-medium">Search</span>}
         </Link>
 
-        <Link 
-          href="/recipes" 
-          className={`flex items-center p-3 rounded-lg transition-all duration-300 hover:bg-white/20 hover:text-yellow-400 text-white ${
-            (isCollapsed && !isMobile) ? 'justify-center' : ''
-          }`}
-          onClick={isMobile ? toggleMobileMenu : undefined}
-        >
-          <span className="text-xl">🍳</span>
-          {(!isCollapsed || isMobile) && <span className="ml-3 font-medium">Recipes</span>}
-        </Link>
+    
 
         <Link 
           href="/blog" 

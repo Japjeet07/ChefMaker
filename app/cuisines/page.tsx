@@ -1,10 +1,10 @@
 import Link from "next/link";
 import React from "react";
+import { API_CONFIG } from "../../constants";
 
 const fetchCuisines = async (): Promise<string[]> => {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://chefmaker.onrender.com' : 'http://localhost:3000');
-    const res = await fetch(`${baseUrl}/api/cuisines`, {
+    const res = await fetch(`${API_CONFIG.BASE_URL}/api/cuisines`, {
       cache: 'no-store' // Ensure fresh data
     });
     

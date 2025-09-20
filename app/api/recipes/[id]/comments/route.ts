@@ -1,25 +1,9 @@
 import connectDB from '../../../../../utils/mongodb';
 import Recipe from '../../../../../models/Recipe';
 import User from '../../../../../models/User';
-import jwt from 'jsonwebtoken';
 import { NextRequest } from 'next/server';
 import { ApiResponse, AddRecipeCommentRequest } from '../../../../../types';
-
-// Helper function to verify JWT token
-const verifyToken = (request: NextRequest): any => {
-  const authHeader = request.headers.get('authorization');
-  const token = authHeader?.replace('Bearer ', '');
-  
-  if (!token) {
-    throw new Error('No token provided');
-  }
-  
-  try {
-    return jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
-  } catch (error) {
-    throw new Error('Invalid token');
-  }
-};
+import { verifyToken } from '../../../../../utils/auth';
 
 // GET /api/recipes/[id]/comments - Get all comments for a recipe
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }): Promise<Response> {

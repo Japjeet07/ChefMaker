@@ -258,7 +258,16 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps):
                     
                     <div>
                       <div className="text-gray-300 text-sm">Created by</div>
-                      <div className="text-white font-semibold">{typeof recipe.createdBy === 'object' ? recipe.createdBy.name : recipe.createdBy}</div>
+                      {typeof recipe.createdBy === 'object' ? (
+                        <Link 
+                          href={`/profile/${recipe.createdBy._id}`}
+                          className="text-white font-semibold hover:text-yellow-400 transition-colors duration-300 cursor-pointer"
+                        >
+                          {recipe.createdBy.name}
+                        </Link>
+                      ) : (
+                        <div className="text-white font-semibold">{recipe.createdBy}</div>
+                      )}
                     </div>
                   </div>
                 </div>

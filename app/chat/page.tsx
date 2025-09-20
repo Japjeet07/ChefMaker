@@ -35,6 +35,9 @@ const ChatPage: React.FC = () => {
     const unsubscribeNewMessages = useRef<(() => void) | null>(null);
     const isInitialLoad = useRef<boolean>(true);
     const currentChatIdRef = useRef<string | null>(null);
+    
+    // Firebase configuration check - must be before any early returns
+    const [firebaseError, setFirebaseError] = useState<string | null>(null);
 
     useEffect(() => {
         const checkMobile = () => {
@@ -54,6 +57,23 @@ const ChatPage: React.FC = () => {
             setOnChatPage(false);
         };
     }, [setOnChatPage]);
+
+    // Check Firebase configuration
+    useEffect(() => {
+        const checkFirebase = async () => {
+            try {
+                // Try to access Firestore to check if it's configured
+                const { db } = await import('../../lib/firebase');
+                if (!db) {
+                    setFirebaseError('Firebase not configured');
+                }
+            } catch (error) {
+                setFirebaseError('Firebase configuration error');
+            }
+        };
+        
+        checkFirebase();
+    }, []);
 
     useEffect(() => {
         if (selectedChat) {
@@ -161,9 +181,24 @@ const ChatPage: React.FC = () => {
     const setupNewMessagesListener = (chatId: string) => {
         unsubscribeNewMessages.current = subscribeToNewMessages(chatId, (newMessage) => {
             setMessages(prev => {
-                const messageExists = prev.some(msg => msg.id === newMessage.id);
-                if (!messageExists) {
-                    return [...prev, newMessage];
+                // Check if this is a real message replacing an optimistic one
+                const optimisticIndex = prev.findIndex(msg => 
+                    msg.id?.startsWith('temp-') && 
+                    msg.senderId === newMessage.senderId && 
+                    msg.content === newMessage.content
+                );
+                
+                if (optimisticIndex !== -1) {
+                    // Replace the optimistic message with the real one
+                    const newMessages = [...prev];
+                    newMessages[optimisticIndex] = newMessage;
+                    return newMessages;
+                } else {
+                    // Check if message already exists (avoid duplicates)
+                    const messageExists = prev.some(msg => msg.id === newMessage.id);
+                    if (!messageExists) {
+                        return [...prev, newMessage];
+                    }
                 }
                 return prev;
             });
@@ -175,13 +210,33 @@ const ChatPage: React.FC = () => {
         e.preventDefault();
         if (!newMessage.trim() || !selectedChat || sending || !user) return;
 
+        const messageContent = newMessage.trim();
         setSending(true);
+        
+        // Optimistically add the message to the UI immediately
+        const optimisticMessage: ChatMessage = {
+            id: `temp-${Date.now()}`, // Temporary ID
+            senderId: user._id,
+            senderName: user.name,
+            content: messageContent,
+            timestamp: { toDate: () => new Date() } as any, // Temporary timestamp
+            read: false,
+            messageType: 'text'
+        };
+        
+        setMessages(prev => [...prev, optimisticMessage]);
+        setNewMessage('');
+        setTimeout(() => scrollToBottom(), 100);
+        
         try {
-            await sendMessage(selectedChat.id!, newMessage.trim(), user.name);
-            setNewMessage('');
-            setTimeout(() => scrollToBottom(), 100);
+            await sendMessage(selectedChat.id!, messageContent, user.name);
+            // The real-time listener will replace the optimistic message with the real one
         } catch (error) {
             console.error('Error sending message:', error);
+            
+            // Remove the optimistic message on error
+            setMessages(prev => prev.filter(msg => msg.id !== optimisticMessage.id));
+            
             if (error instanceof Error && error.message.includes('Firebase is not initialized')) {
                 toast.error('Chat feature is not configured. Please set up Firebase.');
             } else {
@@ -239,8 +294,8 @@ const ChatPage: React.FC = () => {
         );
     }
 
-    // Check if Firebase is not configured (no chats and loading is false)
-    const isFirebaseNotConfigured = chats.length === 0 && !loading;
+    // Check if Firebase is not configured
+    const isFirebaseNotConfigured = !!firebaseError;
 
     return (
         <ProtectedRoute>

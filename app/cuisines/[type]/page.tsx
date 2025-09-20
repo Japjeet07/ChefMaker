@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Recipe } from "../../../types";
+import { API_CONFIG } from "../../../constants";
 
 //components
 import RecipeList from "../../../components/features/RecipeList";
@@ -8,11 +9,8 @@ import ProtectedRoute from "../../../components/layout/ProtectedRoute";
 
 async function getRecipes(cuisine: string): Promise<Recipe[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 
-      (process.env.NODE_ENV === 'production' ? 'https://chefmaker.onrender.com' : 'http://localhost:3000');
-    
     const res = await fetch(
-      `${baseUrl}/api/recipes?cuisine=${encodeURIComponent(cuisine)}`,
+      `${API_CONFIG.BASE_URL}/api/recipes?cuisine=${encodeURIComponent(cuisine)}`,
       { 
         cache: 'no-store',
         headers: {

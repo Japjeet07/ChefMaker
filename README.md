@@ -1,4 +1,4 @@
-# Recipe Finder - Full CRUD Application
+# LetHimCook - Full CRUD Application
 
 A modern recipe management application built with Next.js 13, MongoDB, and Tailwind CSS. This application allows users to browse, search, create, edit, and delete recipes with a beautiful, responsive interface.
 

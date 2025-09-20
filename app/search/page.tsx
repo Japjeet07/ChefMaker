@@ -4,12 +4,12 @@ import RecipeList from "../../components/features/RecipeList";
 import SearchBar from "../../components/features/SearchBar";
 import ProtectedRoute from "../../components/layout/ProtectedRoute";
 import { Recipe } from "../../types";
+import { API_CONFIG } from "../../constants";
 
 async function searchRecipes(query: string): Promise<Recipe[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://chefmaker.onrender.com' : 'http://localhost:3000');
     const res = await fetch(
-      `${baseUrl}/api/recipes?search=${encodeURIComponent(query)}`,
+      `${API_CONFIG.BASE_URL}/api/recipes?search=${encodeURIComponent(query)}`,
       { cache: 'no-store' }
     );
     

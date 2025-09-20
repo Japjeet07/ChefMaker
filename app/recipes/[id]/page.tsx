@@ -1,9 +1,10 @@
 import RecipeDetailClient from "./RecipeDetailClient";
 import { Recipe } from "../../../types";
+import { API_CONFIG } from "../../../constants";
 
 async function getRecipe(id: string): Promise<Recipe | null> {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://chefmaker.onrender.com' : 'http://localhost:3000')}/api/recipes/${id}`,
+    `${API_CONFIG.BASE_URL}/api/recipes/${id}`,
     { cache: 'no-store' }
   );
   if (!res.ok) throw new Error("Failed to fetch recipe");

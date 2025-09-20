@@ -2,25 +2,12 @@ import connectDB from '../../../../utils/mongodb';
 import Recipe from '../../../../models/Recipe';
 import User from '../../../../models/User';
 import mongoose from 'mongoose';
-import jwt from 'jsonwebtoken';
 import { NextRequest } from 'next/server';
 import { ApiResponse, Recipe as RecipeType } from '../../../../types';
+import { verifyToken } from '../../../../utils/auth';
 
-// Helper function to verify JWT token
-const verifyToken = (request: NextRequest): any => {
-  const authHeader = request.headers.get('authorization');
-  const token = authHeader?.replace('Bearer ', '');
   
-  if (!token) {
-    throw new Error('No token provided');
-  }
-  
-  try {
-    return jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
-  } catch (error) {
-    throw new Error('Invalid token');
-  }
-};
+
 
 interface RouteParams {
   params: Promise<{
