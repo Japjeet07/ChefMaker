@@ -272,9 +272,9 @@ function setupAnimation(model: THREE.Group) {
 
   // Configure ScrollTrigger for mobile compatibility
   ScrollTrigger.config({
-    ignoreMobileResize: true, // Keep original setting
+    ignoreMobileResize: false, // Enable mobile resize handling
     syncInterval: 16, // 60fps
-    autoRefreshEvents: "visibilitychange,DOMContentLoaded,load"
+    autoRefreshEvents: "visibilitychange,DOMContentLoaded,load,resize,orientationchange"
   });
 
   // Force refresh on mobile devices
@@ -306,6 +306,17 @@ function setupAnimation(model: THREE.Group) {
     documentHeight: document.documentElement.scrollHeight,
     scrollTop: window.pageYOffset || document.documentElement.scrollTop
   });
+
+  // Add Eruda for mobile console debugging (remove in production)
+  if (isMobile && typeof window !== 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/eruda';
+    script.onload = () => {
+      (window as any).eruda.init();
+      console.log('Eruda mobile console loaded - you can now see console logs on mobile!');
+    };
+    document.head.appendChild(script);
+  }
   
   gsap.fromTo('canvas', { x: "50%", autoAlpha: 0 }, { duration: 1, x: "0%", autoAlpha: 1 });
   gsap.to('.loading', { autoAlpha: 0 });
@@ -418,12 +429,22 @@ function setupAnimation(model: THREE.Group) {
     onUpdate: scene.render,
     scrollTrigger: {
       trigger: ".content",
-      scrub: isMobile ? 0.3 : 0.5, // Slightly faster response on mobile
+      scrub: isMobile ? 0.1 : 0.5, // Much faster response on mobile
       start: "top top",
       end: "bottom bottom",
       anticipatePin: 1,
+      invalidateOnRefresh: true,
+      fastScrollEnd: true,
       onUpdate: (self) => {
-        console.log('ScrollTrigger update:', self.progress, 'isActive:', self.isActive);
+        console.log('ScrollTrigger update:', self.progress, 'isActive:', self.isActive, 'direction:', self.direction);
+        // Force render on mobile for smoother animation
+        if (isMobile) {
+          scene.render();
+        }
+      },
+      onRefresh: () => {
+        console.log('ScrollTrigger refreshed');
+        scene.render();
       }
     },
     defaults: { duration: sectionDuration, ease: 'power2.inOut' }
@@ -528,13 +549,28 @@ export default function CookingScene() {
       }, 100);
     };
 
+    // Add touch scroll handling for mobile
+    const handleTouchMove = () => {
+      // Force ScrollTrigger update on touch move
+      ScrollTrigger.update();
+    };
+
+    const handleScroll = () => {
+      // Force ScrollTrigger update on scroll
+      ScrollTrigger.update();
+    };
+
     window.addEventListener('orientationchange', handleOrientationChange);
     window.addEventListener('resize', handleResize);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       // Cleanup
       window.removeEventListener('orientationchange', handleOrientationChange);
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('scroll', handleScroll);
       
       const canvas = document.querySelector('canvas');
       if (canvas && canvas.parentNode) {
