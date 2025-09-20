@@ -7,9 +7,9 @@ import SafeImage from '../../../../components/ui/SafeImage';
 import { Recipe, Ingredient, Instruction } from '../../../../types';
 
 interface EditRecipeProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 interface FormData {
@@ -27,10 +27,12 @@ interface FormData {
   instructions: Instruction[];
 }
 
-export default function EditRecipe({ params }: EditRecipeProps): React.JSX.Element {
+export default async function EditRecipe({ params }: EditRecipeProps): Promise<React.JSX.Element> {
+  const { id } = await params;
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
+  const [recipeId, setRecipeId] = useState<string>(id);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     description: '',
@@ -46,10 +48,12 @@ export default function EditRecipe({ params }: EditRecipeProps): React.JSX.Eleme
     instructions: [{ step: 1, instruction: '' }]
   });
 
+
   useEffect(() => {
     const fetchRecipe = async (): Promise<void> => {
       try {
-        const response = await fetch(`/api/recipes/${params.id}`);
+        if (!recipeId) return;
+        const response = await fetch(`/api/recipes/${recipeId}`);
         if (response.ok) {
           const data = await response.json();
           const recipe: Recipe = data.data;
@@ -64,7 +68,7 @@ export default function EditRecipe({ params }: EditRecipeProps): React.JSX.Eleme
             servings: recipe.servings.toString(),
             difficulty: recipe.difficulty,
             tags: recipe.tags?.join(', ') || '',
-            createdBy: recipe.createdBy,
+            createdBy: typeof recipe.createdBy === 'string' ? recipe.createdBy : (recipe.createdBy as any)?.name || 'Anonymous',
             ingredients: recipe.ingredients.length > 0 ? recipe.ingredients : [{ name: '', amount: '' }],
             instructions: recipe.instructions.length > 0 ? recipe.instructions : [{ step: 1, instruction: '' }]
           });
@@ -82,7 +86,7 @@ export default function EditRecipe({ params }: EditRecipeProps): React.JSX.Eleme
     };
 
     fetchRecipe();
-  }, [params.id, router]);
+  }, [recipeId, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
@@ -154,7 +158,7 @@ export default function EditRecipe({ params }: EditRecipeProps): React.JSX.Eleme
     setSaving(true);
 
     try {
-      const response = await fetch(`/api/recipes/${params.id}`, {
+      const response = await fetch(`/api/recipes/${recipeId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -172,7 +176,7 @@ export default function EditRecipe({ params }: EditRecipeProps): React.JSX.Eleme
 
       if (response.ok) {
         alert('Recipe updated successfully!');
-        router.push(`/recipes/${params.id}`);
+        router.push(`/recipes/${recipeId}`);
       } else {
         const error = await response.json();
         alert(error.message || 'Failed to update recipe');

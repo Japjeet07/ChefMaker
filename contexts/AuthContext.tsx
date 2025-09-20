@@ -41,12 +41,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (userData: UserWithoutPassword, token: string): void => {
+  const login = (userData: UserWithoutPassword, token: string, redirectCallback?: () => void): void => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     setShowAuthModal(false);
     setShowWelcomeAnimation(true);
+    
+    // Execute redirect callback if provided
+    if (redirectCallback) {
+      redirectCallback();
+    }
   };
 
   const logout = (): void => {

@@ -48,11 +48,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     // Check if user already liked this recipe
-    const existingLike = recipe.likes.find(like => like.user.toString() === user._id.toString());
+    const existingLike = recipe.likes.find((like: any) => like.user.toString() === user._id.toString());
     
     if (existingLike) {
       // Unlike the recipe
-      recipe.likes = recipe.likes.filter(like => like.user.toString() !== user._id.toString());
+      recipe.likes = recipe.likes.filter((like: any) => like.user.toString() !== user._id.toString());
       await recipe.save();
       
       const response: ApiResponse = {

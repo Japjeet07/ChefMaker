@@ -38,7 +38,7 @@ export interface IRecipe extends Document {
   servings: number;
   difficulty: DifficultyLevel;
   tags: string[];
-  createdBy: string;
+  createdBy: Types.ObjectId;
   isPublic: boolean;
   likes: IRecipeLike[];
   comments: IRecipeComment[];
@@ -169,8 +169,9 @@ const RecipeSchema = new Schema<IRecipe>({
     trim: true
   }],
   createdBy: {
-    type: String,
-    default: 'Anonymous'
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
   isPublic: {
     type: Boolean,

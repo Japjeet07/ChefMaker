@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { NextRequest } from 'next/server';
+import { ENV_CONFIG } from '../constants';
 
 // Helper function to verify JWT token
 export const verifyToken = (request: NextRequest): any => {
@@ -11,7 +12,7 @@ export const verifyToken = (request: NextRequest): any => {
   }
   
   try {
-    return jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+    return jwt.verify(token, ENV_CONFIG.JWT_SECRET);
   } catch (error) {
     throw new Error('Invalid token');
   }
@@ -21,7 +22,7 @@ export const verifyToken = (request: NextRequest): any => {
 export const generateToken = (userId: string): string => {
   return jwt.sign(
     { userId },
-    process.env.JWT_SECRET || 'fallback-secret',
+    ENV_CONFIG.JWT_SECRET,
     { expiresIn: '7d' }
   );
 };

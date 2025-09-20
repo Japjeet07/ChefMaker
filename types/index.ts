@@ -50,7 +50,7 @@ export interface Recipe extends BaseEntity {
   servings: number;
   difficulty: DifficultyLevel;
   tags: string[];
-  createdBy: string;
+  createdBy: string | UserWithoutPassword;
   isPublic: boolean;
   likes?: RecipeLike[];
   comments?: RecipeComment[];
@@ -77,6 +77,9 @@ export interface User extends BaseEntity {
   role: 'user' | 'admin';
   favorites: string[];
   cart: CartItem[];
+  followers: string[];
+  following: string[];
+  bio?: string;
   isActive: boolean;
 }
 
@@ -263,6 +266,26 @@ export interface BlogFormData {
   video: string;
   tags: string;
   isPublic: boolean;
+}
+
+// Social/Profile types
+export interface UserProfile extends UserWithoutPassword {
+  followersCount: number;
+  followingCount: number;
+  recipesCount: number;
+  blogsCount: number;
+  isFollowing?: boolean; // For current user's relationship with this profile
+}
+
+export interface FollowRequest {
+  userId: string;
+}
+
+export interface UserStats {
+  followersCount: number;
+  followingCount: number;
+  recipesCount: number;
+  blogsCount: number;
 }
 
 // Utility types

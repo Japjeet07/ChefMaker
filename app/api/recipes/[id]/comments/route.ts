@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params;
     const recipe = await Recipe.findById(id)
       .populate('comments.user', 'name avatar')
-      .lean();
+      .lean() as any;
 
     if (!recipe) {
       const response: ApiResponse = {

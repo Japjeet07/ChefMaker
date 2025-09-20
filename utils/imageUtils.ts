@@ -1,4 +1,5 @@
 // Utility functions for handling image URLs
+import { EXTERNAL_URLS } from '../constants';
 
 /**
  * Extracts the actual image URL from a Google Images search result URL
@@ -67,6 +68,6 @@ export function isValidImageUrl(url: string): boolean {
  * @returns A fallback image URL
  */
 export function getFallbackImageUrl(): string {
-  return 'https://via.placeholder.com/600x400/4F46E5/FFFFFF?text=No+Image+Available';
+  return EXTERNAL_URLS.PLACEHOLDER_IMAGE;
 }
 

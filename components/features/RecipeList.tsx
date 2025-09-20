@@ -2,6 +2,7 @@ import React from "react";
 import SafeImage from "../ui/SafeImage";
 import Link from "next/link";
 import AddToCart from "./AddToCart";
+import UserName from "../ui/UserName";
 import { RecipeListProps } from "../../types";
 
 const RecipeList: React.FC<RecipeListProps> = ({ recipes, type }) => {
@@ -53,7 +54,10 @@ const RecipeList: React.FC<RecipeListProps> = ({ recipes, type }) => {
                 </div>
                 <div className="flex items-center text-gray-300 text-sm">
                   <span className="mr-1">👨‍🍳</span>
-                  <span>{recipe.createdBy}</span>
+                  <UserName 
+                    user={recipe.createdBy} 
+                    className="text-gray-300 hover:text-yellow-400"
+                  />
                 </div>
               </div>
               

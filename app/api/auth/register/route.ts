@@ -64,6 +64,8 @@ export async function POST(request: NextRequest): Promise<Response> {
           role: user.role,
           favorites: user.favorites,
           cart: user.cart,
+          followers: user.followers,
+          following: user.following,
           isActive: user.isActive,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt

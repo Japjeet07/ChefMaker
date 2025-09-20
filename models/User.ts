@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
-import bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcryptjs';
 
 // Interface for cart items
 export interface ICartItem {
@@ -12,12 +12,16 @@ export interface ICartItem {
 export interface IUser extends Document {
   _id: Types.ObjectId;
   name: string;
+  username: string;
   email: string;
   password: string;
   avatar?: string;
   role: 'user' | 'admin';
   favorites: Types.ObjectId[];
   cart: ICartItem[];
+  followers: Types.ObjectId[];
+  following: Types.ObjectId[];
+  bio?: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -49,6 +53,14 @@ const UserSchema = new Schema<IUser>({
     trim: true,
     maxlength: [50, 'Name cannot be more than 50 characters']
   },
+  // Temporary field to handle old database index - will be removed after migration
+  username: {
+    type: String,
+    default: function() {
+      return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    },
+    unique: true
+  },
   email: {
     type: String,
     required: [true, 'Email is required'],
@@ -76,6 +88,19 @@ const UserSchema = new Schema<IUser>({
     ref: 'Recipe'
   }],
   cart: [CartItemSchema],
+  followers: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  following: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  bio: {
+    type: String,
+    maxlength: [500, 'Bio cannot be more than 500 characters'],
+    default: ''
+  },
   isActive: {
     type: Boolean,
     default: true
@@ -85,7 +110,12 @@ const UserSchema = new Schema<IUser>({
 });
 
 // Hash password before saving
-UserSchema.pre('save', async function(next) {
+UserSchema.pre<IUser>('save', async function(next) {
+  // Generate unique username for new users to handle old database index
+  if (this.isNew && !this.username) {
+    this.username = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+  
   if (!this.isModified('password')) return next();
   
   try {

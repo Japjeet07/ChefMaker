@@ -2,12 +2,15 @@
 
 import React, { useState, useRef } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { API_CONFIG } from "../../constants";
 
 const AuthModal: React.FC = () => {
   const { showAuthModal, setShowAuthModal, isLogin, setIsLogin, login } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
 
   const toggleAuthMode = (): void => {
     setIsLogin(!isLogin);
@@ -48,10 +51,9 @@ const AuthModal: React.FC = () => {
     }
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://chefmaker.onrender.com' : 'http://localhost:3000');
-      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+      const endpoint = isLogin ? API_CONFIG.ENDPOINTS.AUTH.LOGIN : API_CONFIG.ENDPOINTS.AUTH.REGISTER;
       
-      const response = await fetch(`${baseUrl}${endpoint}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,6 +69,8 @@ const AuthModal: React.FC = () => {
 
       if (data.success) {
         login(data.data.user, data.data.token);
+        // Redirect to search page after successful login
+        router.push('/search');
         setError('');
         if (formRef.current) {
           formRef.current.reset();

@@ -8,6 +8,7 @@ import AddToCart from "../../../components/features/AddToCart";
 import RecipeInteraction from "../../../components/features/RecipeInteraction";
 import ShareRecipe from "../../../components/features/ShareRecipe";
 import ProtectedRoute from "../../../components/layout/ProtectedRoute";
+import { useAuth } from "../../../contexts/AuthContext";
 import { Recipe } from "../../../types";
 
 interface RecipeDetailClientProps {
@@ -16,8 +17,15 @@ interface RecipeDetailClientProps {
 
 export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps): React.JSX.Element {
   const router = useRouter();
+  const { user } = useAuth();
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [currentRecipe, setCurrentRecipe] = useState<Recipe>(recipe);
+  
+  // Check if current user is the owner of the recipe
+  const isOwner = user && (
+    (typeof recipe.createdBy === 'string' && recipe.createdBy === user._id) ||
+    (typeof recipe.createdBy === 'object' && recipe.createdBy._id === user._id)
+  );
 
   const handleDelete = async (): Promise<void> => {
     if (!confirm("Are you sure you want to delete this recipe? This action cannot be undone.")) {
@@ -26,8 +34,13 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps):
 
     setIsDeleting(true);
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`/api/recipes/${recipe._id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       if (response.ok) {
@@ -63,31 +76,35 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps):
               <div className="flex space-x-4">
                 <ShareRecipe recipe={recipe} />
                 
-                <Link
-                  href={`/recipes/${recipe._id}/edit`}
-                  className="glass-effect px-6 py-3 rounded-full text-white font-semibold hover:bg-green-500 transition-all duration-300 hover-lift flex items-center space-x-2"
-                >
-                  <span>✏️</span>
-                  <span>Edit Recipe</span>
-                </Link>
-                
-                <button
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  className="glass-effect px-6 py-3 rounded-full text-white font-semibold hover:bg-red-500 transition-all duration-300 hover-lift flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isDeleting ? (
-                    <>
-                      <div className="animate-spin">⏳</div>
-                      <span>Deleting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>🗑️</span>
-                      <span>Delete Recipe</span>
-                    </>
-                  )}
-                </button>
+                {isOwner && (
+                  <>
+                    <Link
+                      href={`/recipes/${recipe._id}/edit`}
+                      className="glass-effect px-6 py-3 rounded-full text-white font-semibold hover:bg-green-500 transition-all duration-300 hover-lift flex items-center space-x-2"
+                    >
+                      <span>✏️</span>
+                      <span>Edit Recipe</span>
+                    </Link>
+                    
+                    <button
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="glass-effect px-6 py-3 rounded-full text-white font-semibold hover:bg-red-500 transition-all duration-300 hover-lift flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isDeleting ? (
+                        <>
+                          <div className="animate-spin">⏳</div>
+                          <span>Deleting...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>🗑️</span>
+                          <span>Delete Recipe</span>
+                        </>
+                      )}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
@@ -241,7 +258,7 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps):
                     
                     <div>
                       <div className="text-gray-300 text-sm">Created by</div>
-                      <div className="text-white font-semibold">{recipe.createdBy}</div>
+                      <div className="text-white font-semibold">{typeof recipe.createdBy === 'object' ? recipe.createdBy.name : recipe.createdBy}</div>
                     </div>
                   </div>
                 </div>

@@ -29,8 +29,6 @@ export interface IBlog extends Document {
   isPublic: boolean;
   createdAt: Date;
   updatedAt: Date;
-  
-  // Virtual fields
   likesCount: number;
   commentsCount: number;
 }
@@ -44,7 +42,8 @@ const BlogCommentSchema = new Schema<IBlogComment>({
   },
   content: {
     type: String,
-    required: true,
+    required: [true, 'Comment content is required'],
+    trim: true,
     maxlength: [500, 'Comment cannot be more than 500 characters']
   }
 }, {
@@ -66,14 +65,14 @@ const BlogLikeSchema = new Schema<IBlogLike>({
 const BlogSchema = new Schema<IBlog>({
   title: {
     type: String,
-    required: [true, 'Title is required'],
+    required: [true, 'Blog title is required'],
     trim: true,
-    maxlength: [100, 'Title cannot be more than 100 characters']
+    maxlength: [200, 'Title cannot be more than 200 characters']
   },
   content: {
     type: String,
-    required: [true, 'Content is required'],
-    maxlength: [2000, 'Content cannot be more than 2000 characters']
+    required: [true, 'Blog content is required'],
+    trim: true
   },
   image: {
     type: String,
@@ -90,16 +89,11 @@ const BlogSchema = new Schema<IBlog>({
   },
   tags: [{
     type: String,
-    trim: true
+    trim: true,
+    maxlength: [30, 'Tag cannot be more than 30 characters']
   }],
-  likes: {
-    type: [BlogLikeSchema],
-    default: []
-  },
-  comments: {
-    type: [BlogCommentSchema],
-    default: []
-  },
+  likes: [BlogLikeSchema],
+  comments: [BlogCommentSchema],
   isPublic: {
     type: Boolean,
     default: true
@@ -118,13 +112,13 @@ BlogSchema.virtual('commentsCount').get(function() {
   return this.comments.length;
 });
 
+// Ensure virtual fields are serialized
+BlogSchema.set('toJSON', { virtuals: true });
+BlogSchema.set('toObject', { virtuals: true });
+
 // Index for better query performance
 BlogSchema.index({ author: 1, createdAt: -1 });
 BlogSchema.index({ tags: 1 });
 BlogSchema.index({ isPublic: 1, createdAt: -1 });
-
-// Ensure virtual fields are serialized
-BlogSchema.set('toJSON', { virtuals: true });
-BlogSchema.set('toObject', { virtuals: true });
 
 export default mongoose.models.Blog || mongoose.model<IBlog>('Blog', BlogSchema);

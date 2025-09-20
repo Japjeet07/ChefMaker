@@ -1,6 +1,28 @@
+// Environment Configuration
+export const ENV_CONFIG = {
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  JWT_SECRET: process.env.JWT_SECRET || (() => {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET must be set in production');
+    }
+    return 'dev-secret-key';
+  })(),
+  MONGODB_URI: process.env.MONGODB_URI || (() => {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('MONGODB_URI must be set in production');
+    }
+    return 'mongodb://localhost:27017/chefmaker';
+  })(),
+} as const;
+
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || (() => {
+    if (process.env.NODE_ENV === 'production') {
+      return 'https://chefmaker.onrender.com';
+    }
+    return 'http://localhost:3000';
+  })(),
   ENDPOINTS: {
     RECIPES: '/api/recipes',
     AUTH: {
@@ -9,6 +31,7 @@ export const API_CONFIG = {
     },
     CART: '/api/cart',
     CUISINES: '/api/cuisines',
+    BLOGS: '/api/blogs',
   },
 } as const;
 
@@ -23,10 +46,23 @@ export const APP_CONFIG = {
 // UI Constants
 export const UI_CONSTANTS = {
   ANIMATION_DURATION: 300,
-  DEBOUNCE_DELAY: 500,
   PAGINATION: {
     DEFAULT_PAGE_SIZE: 10,
     MAX_PAGE_SIZE: 50,
+  },
+} as const;
+
+// External URLs and Assets
+export const EXTERNAL_URLS = {
+  CLOUD_IMAGE: 'https://assets.codepen.io/557388/clouds.png',
+  PLANE_MODEL: 'https://assets.codepen.io/557388/1405+Plane_1.obj',
+  PLACEHOLDER_IMAGE: 'https://via.placeholder.com/600x400/4F46E5/FFFFFF?text=No+Image+Available',
+  THEMEALDB_API: 'https://www.themealdb.com/api/json/v1/1',
+  SOCIAL_SHARE: {
+    TWITTER: 'https://twitter.com/intent/tweet',
+    FACEBOOK: 'https://www.facebook.com/sharer/sharer.php',
+    WHATSAPP: 'https://wa.me/',
+    TELEGRAM: 'https://t.me/share/url',
   },
 } as const;
 

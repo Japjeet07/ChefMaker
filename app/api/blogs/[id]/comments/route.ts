@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params;
     const blog = await Blog.findById(id)
       .populate('comments.user', 'name avatar')
-      .lean();
+      .lean() as any;
 
     if (!blog) {
       const response: ApiResponse = {

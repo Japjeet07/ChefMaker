@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Recipe } from "../../types";
+import { EXTERNAL_URLS } from "../../constants";
 
 interface ShareRecipeProps {
   recipe: Recipe;
@@ -44,16 +45,16 @@ const ShareRecipe: React.FC<ShareRecipeProps> = ({ recipe, className = "" }) => 
     let url = '';
     switch (platform) {
       case 'twitter':
-        url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+        url = `${EXTERNAL_URLS.SOCIAL_SHARE.TWITTER}?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
         break;
       case 'facebook':
-        url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+        url = `${EXTERNAL_URLS.SOCIAL_SHARE.FACEBOOK}?u=${encodeURIComponent(shareUrl)}`;
         break;
       case 'whatsapp':
-        url = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+        url = `${EXTERNAL_URLS.SOCIAL_SHARE.WHATSAPP}?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
         break;
       case 'telegram':
-        url = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+        url = `${EXTERNAL_URLS.SOCIAL_SHARE.TELEGRAM}?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
         break;
       case 'email':
         url = `mailto:?subject=${encodeURIComponent(shareText)}&body=${encodeURIComponent(`Check out this recipe: ${shareUrl}`)}`;

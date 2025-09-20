@@ -8,16 +8,32 @@ import ProtectedRoute from "../../../components/layout/ProtectedRoute";
 
 async function getRecipes(cuisine: string): Promise<Recipe[]> {
   try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 
+      (process.env.NODE_ENV === 'production' ? 'https://chefmaker.onrender.com' : 'http://localhost:3000');
+    
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://chefmaker.onrender.com' : 'http://localhost:3000')}/api/recipes?cuisine=${encodeURIComponent(cuisine)}`,
-      { cache: 'no-store' }
+      `${baseUrl}/api/recipes?cuisine=${encodeURIComponent(cuisine)}`,
+      { 
+        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }
     );
     
     if (!res.ok) {
-      throw new Error('Failed to fetch recipes');
+      const errorData = await res.json().catch(() => ({}));
+      console.error(`Failed to fetch recipes: ${res.status} ${res.statusText}`, errorData);
+      throw new Error(`Failed to fetch recipes: ${errorData.message || res.statusText}`);
     }
     
     const response = await res.json();
+    
+    if (!response.success) {
+      console.error('API returned error:', response);
+      throw new Error(response.message || 'API request failed');
+    }
+    
     return response.data || [];
   } catch (error) {
     console.error('Error fetching recipes:', error);

@@ -58,7 +58,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     // Check if user already rated this recipe
-    const existingRatingIndex = recipe.ratings.findIndex(r => r.user.toString() === user._id.toString());
+    const existingRatingIndex = recipe.ratings.findIndex((r: any) => r.user.toString() === user._id.toString());
     
     if (existingRatingIndex !== -1) {
       if (rating === 0) {
@@ -66,13 +66,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         recipe.ratings.splice(existingRatingIndex, 1);
         await recipe.save();
         
+        // Refresh the document to get updated virtual fields
+        const updatedRecipe = await Recipe.findById(id);
+        
         const response: ApiResponse = {
           success: true,
           message: 'Rating removed successfully',
           data: { 
             rating: 0, 
-            averageRating: recipe.averageRating, 
-            ratingsCount: recipe.ratingsCount 
+            averageRating: updatedRecipe?.averageRating || 0, 
+            ratingsCount: updatedRecipe?.ratingsCount || 0 
           }
         };
         return Response.json(response);
@@ -81,13 +84,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         recipe.ratings[existingRatingIndex].rating = rating;
         await recipe.save();
         
+        // Refresh the document to get updated virtual fields
+        const updatedRecipe = await Recipe.findById(id);
+        
         const response: ApiResponse = {
           success: true,
           message: 'Rating updated successfully',
           data: { 
             rating, 
-            averageRating: recipe.averageRating, 
-            ratingsCount: recipe.ratingsCount 
+            averageRating: updatedRecipe?.averageRating || 0, 
+            ratingsCount: updatedRecipe?.ratingsCount || 0 
           }
         };
         return Response.json(response);
@@ -105,13 +111,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       recipe.ratings.push({ user: user._id, rating });
       await recipe.save();
       
+      // Refresh the document to get updated virtual fields
+      const updatedRecipe = await Recipe.findById(id);
+      
       const response: ApiResponse = {
         success: true,
         message: 'Rating added successfully',
         data: { 
           rating, 
-          averageRating: recipe.averageRating, 
-          ratingsCount: recipe.ratingsCount 
+          averageRating: updatedRecipe?.averageRating || 0, 
+          ratingsCount: updatedRecipe?.ratingsCount || 0 
         }
       };
       return Response.json(response);
@@ -164,7 +173,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     // Remove user's rating
     const initialLength = recipe.ratings.length;
-    recipe.ratings = recipe.ratings.filter(r => r.user.toString() !== user._id.toString());
+        recipe.ratings = recipe.ratings.filter((r: any) => r.user.toString() !== user._id.toString());
     
     if (recipe.ratings.length === initialLength) {
       const response: ApiResponse = {
@@ -176,12 +185,15 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     await recipe.save();
     
+    // Refresh the document to get updated virtual fields
+    const updatedRecipe = await Recipe.findById(id);
+    
     const response: ApiResponse = {
       success: true,
       message: 'Rating removed successfully',
       data: { 
-        averageRating: recipe.averageRating, 
-        ratingsCount: recipe.ratingsCount 
+        averageRating: updatedRecipe?.averageRating || 0, 
+        ratingsCount: updatedRecipe?.ratingsCount || 0 
       }
     };
     return Response.json(response);

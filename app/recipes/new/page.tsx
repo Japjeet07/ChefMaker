@@ -16,7 +16,6 @@ interface FormData {
   servings: string;
   difficulty: string;
   tags: string;
-  createdBy: string;
   ingredients: Ingredient[];
   instructions: Instruction[];
 }
@@ -34,7 +33,6 @@ export default function AddRecipe(): React.JSX.Element {
     servings: '',
     difficulty: 'Easy',
     tags: '',
-    createdBy: 'Anonymous',
     ingredients: [{ name: '', amount: '' }],
     instructions: [{ step: 1, instruction: '' }]
   });
@@ -109,16 +107,22 @@ export default function AddRecipe(): React.JSX.Element {
     setLoading(true);
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch('/api/recipes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ...formData,
+          name: formData.name,
+          description: formData.description,
+          cuisine: formData.cuisine,
+          image: formData.image,
           prepTime: parseInt(formData.prepTime),
           cookTime: parseInt(formData.cookTime),
           servings: parseInt(formData.servings),
+          difficulty: formData.difficulty,
           tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
           ingredients: formData.ingredients.filter(ing => ing.name && ing.amount),
           instructions: formData.instructions.filter(inst => inst.instruction)

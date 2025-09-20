@@ -4,7 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Blog } from "../../types";
 import SafeImage from "../ui/SafeImage";
+import UserName from "../ui/UserName";
 import { useAuth } from "../../contexts/AuthContext";
+import { useThrottle } from "../../hooks/useThrottle";
 
 interface BlogListProps {
   blogs: Blog[];
@@ -42,7 +44,7 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
     return user && currentBlog.likes?.some(like => like.user === user._id) || false;
   };
 
-  const handleLike = async (blog: Blog): Promise<void> => {
+  const handleLikeInternal = async (blog: Blog): Promise<void> => {
     if (!user || likingBlogs.has(blog._id)) return;
 
     setLikingBlogs(prev => new Set(prev).add(blog._id));
@@ -79,7 +81,9 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
     }
   };
 
-  const handleComment = async (blog: Blog): Promise<void> => {
+  const handleLike = useThrottle(handleLikeInternal, 1000); // Throttle to 1 second
+
+  const handleCommentInternal = async (blog: Blog): Promise<void> => {
     const commentText = newComments.get(blog._id);
     if (!user || !commentText?.trim() || commentingBlogs.has(blog._id)) return;
 
@@ -122,6 +126,8 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
     }
   };
 
+  const handleComment = useThrottle(handleCommentInternal, 2000); // Throttle to 2 seconds
+
   const toggleComments = (blogId: string): void => {
     setShowComments(prev => {
       const newSet = new Set(prev);
@@ -145,13 +151,13 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
           {/* Instagram-like header */}
           <div className="flex items-center justify-between p-4 border-b border-white/10">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">
-                  {blog.author.name.charAt(0).toUpperCase()}
-                </span>
-              </div>
+              <UserName 
+                user={blog.author} 
+                showAvatar={true}
+                avatarSize="md"
+                className="text-white hover:text-yellow-400"
+              />
               <div>
-                <h3 className="text-white font-semibold">{blog.author.name}</h3>
                 <p className="text-gray-400 text-sm">{formatDate(blog.createdAt)}</p>
               </div>
             </div>
