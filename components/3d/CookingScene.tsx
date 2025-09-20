@@ -278,6 +278,13 @@ function setupAnimation(model: THREE.Group) {
       ScrollTrigger.refresh();
     }, 100);
   }
+
+  // Debug mobile scroll
+  console.log('Setting up animation for device:', {
+    isMobile: window.innerWidth <= 768,
+    userAgent: navigator.userAgent,
+    touchSupport: 'ontouchstart' in window
+  });
   
   gsap.fromTo('canvas', { x: "50%", autoAlpha: 0 }, { duration: 1, x: "0%", autoAlpha: 1 });
   gsap.to('.loading', { autoAlpha: 0 });
@@ -390,16 +397,21 @@ function setupAnimation(model: THREE.Group) {
     onUpdate: scene.render,
     scrollTrigger: {
       trigger: ".content",
-      scrub: 1, // Faster scrub for mobile responsiveness
+      scrub: 0.5, // Even faster scrub for mobile
       start: "top top",
       end: "bottom bottom",
       anticipatePin: 1,
       refreshPriority: -1,
+      invalidateOnRefresh: true,
       onUpdate: (self) => {
         // Force render on mobile
         if (window.innerWidth <= 768) {
           scene.render();
         }
+        console.log('ScrollTrigger update:', self.progress);
+      },
+      onRefresh: () => {
+        console.log('ScrollTrigger refreshed');
       }
     },
     defaults: { duration: sectionDuration, ease: 'power2.inOut' }
@@ -504,13 +516,39 @@ export default function CookingScene() {
       }
     };
 
+    // Add touch event handling for mobile
+    const handleTouchStart = () => {
+      console.log('Touch start detected');
+    };
+
+    const handleTouchMove = () => {
+      console.log('Touch move detected');
+    };
+
+    const handleScroll = () => {
+      console.log('Scroll detected');
+    };
+
     window.addEventListener('orientationchange', handleOrientationChange);
     window.addEventListener('resize', handleResize);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Force multiple refreshes for mobile
+    if (window.innerWidth <= 768) {
+      setTimeout(() => ScrollTrigger.refresh(), 100);
+      setTimeout(() => ScrollTrigger.refresh(), 500);
+      setTimeout(() => ScrollTrigger.refresh(), 1000);
+    }
 
     return () => {
       // Cleanup
       window.removeEventListener('orientationchange', handleOrientationChange);
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('scroll', handleScroll);
       
       const canvas = document.querySelector('canvas');
       if (canvas && canvas.parentNode) {
