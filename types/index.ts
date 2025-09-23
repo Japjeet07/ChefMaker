@@ -195,7 +195,7 @@ export interface SafeImageProps {
 export interface AuthContextType {
   user: UserWithoutPassword | null;
   loading: boolean;
-  login: (userData: UserWithoutPassword, token: string) => void;
+  login: (userData: UserWithoutPassword, token: string, redirectCallback?: () => void) => void;
   logout: () => void;
   showAuthModal: boolean;
   setShowAuthModal: (show: boolean) => void;
@@ -206,6 +206,7 @@ export interface AuthContextType {
   completeLogout: () => void;
   showWelcomeAnimation: boolean;
   completeWelcome: () => void;
+  updateUser: (updatedUser: UserWithoutPassword) => void;
 }
 
 // Form types
